@@ -55,29 +55,31 @@ class GyroChannel(QHBoxLayout):
         dt = 0
         if self.prevTime == -1:
             dt = time
+            self.prevTime = time
         else:
-            dt = time - prevTime
-            prevTime = time
+            dt = time - self.prevTime
+            self.prevTime = time
 
         if dt > 1: # skip integration if dt is large
             return self.intValue
-
-        self.intValue += dt * value - self.zero
-
+        
+        dd = dt * (value - self.zero) / 1000
+        self.intValue += dd
+        self.currLabel.setText("Current value: " + str(self.intValue))
         # update plots
         self.rawValues[:-1] = self.rawValues[1:]
         self.intValues[:-1] = self.intValues[1:]
         self.rawValues[-1] = value
         self.intValues[-1] = self.intValue
         
-        ptr += 1
+        self.ptr += 1
         self.curveRaw.setData(self.rawValues)
-        self.curveRaw.setPos(ptr, 0)
+        self.curveRaw.setPos(self.ptr, 0)
         self.curveInt.setData(self.intValues)
-        self.curveInt.setPos(ptr, 0)
+        self.curveInt.setPos(self.ptr, 0)
 
         # return change in rotation for mesh
-        return dt * value - self.zero
+        return dd
 
 
 
